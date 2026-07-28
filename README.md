@@ -21,13 +21,13 @@ pip install -e .
 From GitHub:
 
 ```bash
-pip install "git+https://github.com/augustoafleal/options-envs.git"
+pip install "git+https://github.com/ramos-ai/options-envs.git"
 ```
 
 To install a specific branch, tag, or commit:
 
 ```bash
-pip install "git+https://github.com/augustoafleal/options-envs.git@main"
+pip install "git+https://github.com/ramos-ai/options-envs.git@main"
 ```
 
 ### Development and tests
