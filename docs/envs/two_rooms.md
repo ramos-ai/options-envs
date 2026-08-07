@@ -96,6 +96,14 @@ reset before continuing.
 The `"ansi"` mode returns a textual grid with `A` for the agent, `G` for the
 goal, and `~` for penalized cells.
 
+## Runnable Examples
+
+```bash
+python examples/two_rooms/random_agent.py
+python examples/two_rooms/render.py
+python examples/two_rooms/render.py --steps 20 --seed 0
+```
+
 ## Version History
 
 - `v0`: initial TwoRooms environment in `options-envs`.

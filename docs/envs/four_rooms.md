@@ -93,6 +93,14 @@ reset before continuing.
 
 The `"ansi"` mode returns a textual grid with the agent and goal marked.
 
+## Runnable Examples
+
+```bash
+python examples/four_rooms/random_agent.py
+python examples/four_rooms/render.py
+python examples/four_rooms/render.py --steps 20 --seed 0
+```
+
 ## Version History
 
 - `v0`: initial FourRooms environment in `options-envs`.
