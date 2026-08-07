@@ -12,4 +12,7 @@ Minimum expectations:
 
 Example:
 
-- `docs/envs/fourrooms.md`
+- `docs/envs/four_rooms.md`
+
+Use [`docs/envs/template.md`](envs/template.md) as the starting point for the
+environment page.

@@ -64,6 +64,8 @@ obs, info = env.reset(seed=0)
 ## Available environment
 
 - `OptionsEnv/Pinball-v0`
+- `OptionsEnv/FourRooms-v0`
+- `OptionsEnv/TwoRooms-v0`
 
 ## Testing
 

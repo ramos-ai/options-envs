@@ -1,65 +1,134 @@
 # Pinball
 
-## Gymnasium ID
+| Action Space | `Discrete(5)` |
+| --- | --- |
+| Observation Space | `Box(4,)` (`float32`) |
+| Import | `gymnasium.make("OptionsEnv/Pinball-v0")` |
 
-`OptionsEnv/Pinball-v0`
+## Description
 
-## Observation
+Pinball is a continuous-state environment for hierarchical reinforcement
+learning and options research. The agent applies impulses to a ball moving in a
+bounded table containing polygonal obstacles and a target.
 
-By default, `OptionsEnv/Pinball-v0` returns a continuous **state vector** as observation (`obs_type="state"`). RGB imagery is available exclusively through `render()` with `render_mode="rgb_array"` — it is not the default observation.
-
-### State vector
-
-The observation is a `numpy.ndarray` of shape `(4,)` and dtype `np.float32`:
-
-```
-[x, y, vx, vy]
-```
-
-| Index | Field | Range |
-|-------|-------|-------|
-| `0` | `x` — horizontal position | `[0, 1]` |
-| `1` | `y` — vertical position | `[0, 1]` |
-| `2` | `vx` — horizontal velocity | `[-1, 1]` |
-| `3` | `vy` — vertical velocity | `[-1, 1]` |
+The default observation is the ball state. RGB frames are available through
+`render()`, but images are not used as observations.
 
 ```python
 import gymnasium as gym
 import options_envs
 
-# Default: state observation
 env = gym.make("OptionsEnv/Pinball-v0")
-obs, info = env.reset(seed=0)
-
-print(obs.shape) # (4,)
-print(obs.dtype) # float32
+observation, info = env.reset(seed=0)
 ```
 
-Explicit `obs_type` parameter:
+The observation type can also be selected explicitly:
 
 ```python
 env = gym.make("OptionsEnv/Pinball-v0", obs_type="state")
-obs, info = env.reset(seed=0)
+observation, info = env.reset(seed=0)
 ```
 
-### RGB rendering (not observation)
+## Action Space
 
-To obtain RGB frames for recording or visualization, use `render_mode="rgb_array"`. The observation **remains** the state vector; only `render()` returns an image.
+There are five discrete actions:
+
+| Action | Effect |
+|---:|---|
+| 0 | thrust right |
+| 1 | thrust down |
+| 2 | thrust left |
+| 3 | thrust up |
+| 4 | no-op |
+
+## Observation Space
+
+The state observation is a `numpy.ndarray` with shape `(4,)` and dtype
+`np.float32`:
+
+```text
+[x, y, vx, vy]
+```
+
+| Index | Field | Range |
+|---:|---|---|
+| 0 | `x` — horizontal position | `[0, 1]` |
+| 1 | `y` — vertical position | `[0, 1]` |
+| 2 | `vx` — horizontal velocity | `[-1, 1]` |
+| 3 | `vy` — vertical velocity | `[-1, 1]` |
+
+RGB rendering does not change the observation:
 
 ```python
 env = gym.make("OptionsEnv/Pinball-v0", render_mode="rgb_array")
-obs, info = env.reset(seed=0)
-frame = env.render() # (600, 800, 3) uint8
-
-# obs is still the state vector
-print(obs.shape) # (4,)
+observation, info = env.reset(seed=0)
+frame = env.render()  # (600, 800, 3), uint8
 ```
 
-## Available task
+## Rewards
 
-- `default-v0`
+| Event | Reward |
+|---|---:|
+| Thrust action without reaching the target | `-5.0` |
+| No-op action without reaching the target | `-1.0` |
+| Reaching the target | `10000.0` |
 
-## Runnable examples
+The implementation uses the following reward constants:
+
+| Constant | Value | Meaning |
+|---|---:|---|
+| `step_penalty` | `-1.0` | No-op step penalty. |
+| `thrust_penalty` | `-5.0` | Thrust step penalty. |
+| `success_reward` | `10000.0` | Reward for reaching the target. |
+
+## Starting State
+
+At reset, the ball is placed at one of the start positions defined by the
+selected layout. The position is sampled with Gymnasium's seeded random
+generator.
+
+## Episode Termination
+
+The episode terminates when the ball reaches the target. It is truncated when
+the configured episode step limit is reached before success.
+
+## Arguments
+
+| Argument | Default | Description |
+|---|---|---|
+| `task` | `"default-v0"` | Selects the task and layout. |
+| `max_steps` | Task-dependent | Environment-level truncation horizon. |
+| `obs_type` | `"state"` | Current observation representation. |
+| `render_mode` | `None` | `None`, `"rgb_array"`, or `"human"`. |
+
+Available tasks are `default-v0` and `hard-v0`.
+
+| Task | Layout | `max_steps` |
+|---|---|---:|
+| `default-v0` | `default-v0.cfg` | `500` |
+| `hard-v0` | `hard-v0.cfg` | `10000` |
+
+## Version History
+
+- `v0`: initial Pinball environment in `options-envs`.
+
+## Notes
+
+The environment supports the following render modes:
+
+| Mode | Description |
+|---|---|
+| `None` | No rendering. |
+| `"rgb_array"` | Returns a `(600, 800, 3)` RGB array. |
+| `"human"` | Displays the table in a Pygame window. |
+
+Layouts and task definitions are packaged under
+`options_envs/envs/pinball/assets/layouts/` and
+`options_envs/envs/pinball/tasks.py`.
+
+## Useful Information
+
+### Runnable Examples
 
 ```bash
 python examples/pinball/random_agent.py
@@ -67,49 +136,28 @@ python examples/pinball/render.py
 python examples/pinball/render.py outputs/my_run.mp4
 ```
 
-## Code location
-
-`options_envs/envs/pinball/`
-
-## Layouts and assets
+### Layouts and Assets
 
 `options_envs/envs/pinball/assets/layouts/`
 
-## Main files
+### Main Files
 
 | File | Description |
-|------|-------------|
-| `env.py` | Implementation of the Gymnasium Pinball environment |
-| `tasks.py` | Versioned task definitions |
-| `registration.py` | Registration of the `OptionsEnv/Pinball-v0` ID |
-| `assets/layouts/` | Environment layouts and configurations |
+|---|---|
+| `options_envs/envs/pinball/env.py` | Gymnasium Pinball environment. |
+| `options_envs/envs/pinball/tasks.py` | Versioned task definitions. |
+| `options_envs/envs/pinball/config.py` | Layout configuration loader. |
+| `options_envs/envs/pinball/registration.py` | Registration of `OptionsEnv/Pinball-v0`. |
+| `options_envs/envs/pinball/assets/layouts/` | Packaged environment layouts. |
 
-## Default configuration
+## References
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `task` | `default-v0` | Task identifier |
-| `max_steps` | `500` | Episode horizon |
-| `obs_type` | `"state"` | Observation type (currently only `"state"`) |
-| `step_penalty` | `-1.0` | Reward per step without thrust |
-| `thrust_penalty` | `-5.0` | Reward per step with thrust |
-| `success_reward` | `10000.0` | Reward upon reaching the target |
-| `action_space` | `Discrete(5)` | 0=right, 1=down, 2=left, 3=up, 4=no-op |
-| `observation_space` | `Box(4,)` | `[x, y, vx, vy]` — positions in `[0,1]`, velocities in `[-1,1]` |
+The Pinball environment is based on the classic Pinball domain used in
+reinforcement learning and option-learning research.
 
-## Render modes
+- [Konidaris / Brown IRL Pinball domain](http://irl.cs.brown.edu/pinball/)
+- [Pierre-Luc Bacon's Python RL implementation](https://github.com/amarack/python-rl/tree/master)
 
-| Mode | Description |
-|------|-------------|
-| `None` | No rendering (fastest) |
-| `"rgb_array"` | Returns an `(H, W, 3)` numpy array — suitable for recording or headless environments |
-| `"human"` | Opens a Pygame window displaying the pinball table in real time |
+## Code Location
 
-## Background and references
-
-The Pinball environment in this project is based on the classic Pinball domain used in reinforcement learning and option-learning research.
-
-Relevant references:
-
-- Konidaris / Brown IRL Pinball domain: http://irl.cs.brown.edu/pinball/
-- Pierre-Luc Bacon's Python RL implementation/reference: https://github.com/amarack/python-rl/tree/master
+`options_envs/envs/pinball/`
